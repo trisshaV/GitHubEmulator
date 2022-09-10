@@ -1,0 +1,29 @@
+#!/bin/dash
+
+# get commit and filename
+commit=$(echo $1 | cut -d ":" -f1)
+filename=$(echo $1 | cut -d ":" -f2)
+
+#if no commit is given, print out the file in the index
+if [ -z $commit ]
+then
+    if [ -e ".tigger/index/$filename" ]
+    then
+        cat ".tigger/index/$filename"
+    else
+        echo "tigger-show: error: '$filename' not found in index"
+    fi
+else
+# If commit is given, print out contents of file as of commit number
+    if [ -d ".tigger/repo/$commit" ]
+    then
+        if [ -e ".tigger/repo/$commit/$filename" ]
+        then
+            cat ".tigger/repo/$commit/$filename"
+        else
+            echo "tigger-show: error: '$filename' not found in commit $commit"
+        fi
+    else
+        echo "tigger-show: error: unknown commit '$commit'"
+    fi
+fi

@@ -1,0 +1,53 @@
+#!/bin/dash
+
+# Check if commit message exists
+if [ -z "$2" ]
+then
+    echo "Please enter a commit message"
+    exit 1
+fi
+        
+
+# Find the number of commits currently at
+
+if test -f ".tigger/log"
+then
+    num=$(wc -l .tigger/log| cut -d " " -f1)
+else
+    num=0
+    touch .tigger/log
+fi
+
+# If -a flag is included
+if [ $1 = "-a" ]
+then
+    message=$3
+    for file in *
+    do
+        cp -u $file ".tigger/index"
+    done
+fi
+
+# Check if there are changed files to commit
+
+if [ $num -gt 0 ]
+then
+    recentlyadded=$(($num - 1))
+    if diff -r ".tigger/repo/$recentlyadded" ".tigger/index" >/dev/null
+    then
+        echo "nothing to commit"
+        exit 1
+    fi
+fi
+
+echo "$num $2" >> .tigger/log
+echo "Committed as commit $num"
+mkdir .tigger/repo/$num
+for file in $(ls .tigger/index)
+    do
+        cp -u ".tigger/index/$file" ".tigger/repo/$num"
+done
+
+
+
+

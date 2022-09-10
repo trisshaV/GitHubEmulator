@@ -1,0 +1,4 @@
+#!/bin/dash
+
+# Prints out all commits made thus far
+cat .tigger/log | sort -r -k1

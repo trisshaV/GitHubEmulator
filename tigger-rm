@@ -1,0 +1,84 @@
+#!/bin/dash
+
+#Removes a file from the index, or from the current directory and the index
+
+# Set cached and forced variables to check whether the appropriate command line
+# arguments have been given
+cached=0
+forced=0
+
+if [ $1 = "--force" ] && [ $2 = "--cached" ]
+then
+    forced=1
+    cached=1
+fi
+
+if [ $1 = "--cached" ] && [ $# -ge 2 ]
+then
+    cached=1
+fi
+
+if [ $1 = "--force" ] && [ $# -ge 2 ]
+then
+    forced=1
+fi
+
+
+#finding the latest commit
+if test -f ".tigger/log"
+then
+    num=$(wc -l .tigger/log| cut -d " " -f1)
+    num=$(($num - 1))
+fi
+
+for file in "$@"
+do
+
+    if [ $file != "--cached" ] && [ $file != "--force" ] && [ $forced = 0 ] 
+    then
+        # check if file exists:
+        if [ ! -e ".tigger/index/$file" ]
+        then
+            echo "tigger-rm: error: '$file' is not in the tigger repository"
+        fi
+
+        if [ $forced = 0 ]
+        then
+            # If file in index is different to the working file and the file in the repo
+            if [ -f ".tigger/repo/$num/$file" ] && [ "$(cmp ".tigger/index/$file" "$file")" != "" ] && [ "$(cmp ".tigger/index/$file" ".tigger/repo/$num/$file")" != "" ]
+            then
+                echo "tigger-rm: error: '$file' in index is different to both the working file and the respository"  
+            # If file in repo is diff to working file          
+            elif  [ -f ".tigger/repo/$num/$file" ] && [ "$(cmp ".tigger/repo/$num/$file" "$file")" != "" ]
+            then
+                echo "tigger-rm: error: '$file' in repository is different to the working file"
+            # If the file currently has staged changes in the index
+            elif [ "$(cmp ".tigger/index/$file" "$file")" != "" ]
+            then
+                echo "tigger-rm: error: '$file' has staged changes in the index"
+            fi
+        fi
+    fi
+
+    if [ $file != "--cached" ] && [ $file != "--force" ]
+    then
+        if [ $forced = 0 ] && [ $cached = 0 ]
+        then
+            rm .tigger/index/$file
+            continue
+        elif [ $forced = 1 ] && [ $cached = 0 ]
+        then
+            rm  .tigger/index/$file
+            rm  .tigger/repo/$num/$file
+        elif [ $cached = 1 ] && [ $forced = 0 ]
+        then
+            rm .tigger/index/$file
+        else
+            rm .tigger/index/$file
+            rm .tigger/repo/$num/$file
+        fi
+    fi
+
+
+
+done

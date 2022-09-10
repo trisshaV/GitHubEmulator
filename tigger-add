@@ -1,0 +1,26 @@
+#!/bin/dash
+
+# check if .tigger has been created
+if ! test -d .tigger/
+then 
+    echo "tigger-add: error: tigger repository directory .tigger not found"
+    exit 1
+fi
+
+# check if filename is valid and exists, then makes a copy of the file into the index
+
+for filename in "$@"
+do
+    check=$(echo "$filename" | grep -E '^[A-zA-Z0-9][A-zA-Z0-9\.\_\-]*$')
+    if test "$check" = ""
+    then
+        echo "tigger-add: error: invalid filename"
+        exit 1
+    elif ! test -f "$filename"
+    then
+        echo "tigger-add: error: can not open '$filename'"
+        exit 1
+    else 
+        cp "$filename" .tigger/index
+    fi
+done

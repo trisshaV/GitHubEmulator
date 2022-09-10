@@ -1,0 +1,9 @@
+[core]
+	repositoryformatversion = 0
+	fileMode = false
+	bare = false
+	logallrefupdates = true
+	worktree = /import/cage/5/z5309457/2041/ass1
+[user]
+	email = tigger@example.com
+	name = tigger
